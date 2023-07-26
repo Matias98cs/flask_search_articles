@@ -41,7 +41,7 @@ def search_products(data, parametros):
     current_time = time.gmtime()
     time_stamp = calendar.timegm(current_time)
     match parametros:
-        case parametros if parametros['search'] != '':
+        case parametros if parametros['search'] != '' and parametros["search"] != None:
             searched_articles = [
                 item for item in data if f'{parametros["search"].lower()}' in item['descripcion'].lower()]
             a['ctimestamp'] = time_stamp
@@ -50,9 +50,9 @@ def search_products(data, parametros):
             response = make_response(json_searched, 200)
             response.headers['Content-Type'] = 'application/json'
             return response
-        case parametros if parametros['categoria'] != '':
-            searched_categorias = [item for item in data if int(
-                parametros['categoria']) == int(item['categoria']['categoria'])]
+        case parametros if parametros['categoria'] != '' and parametros['categoria'] != None:
+            searched_categorias = [item for item in data if
+                                   int(parametros['categoria']) == int(item['categoria']['categoria'])]
             a['ctimestamp'] = time_stamp
             a['registros'] = searched_categorias
             json_searched = jsonify(a)
@@ -76,6 +76,7 @@ def search_articles():
     global articles
     categoria = request.args.get('categoria')
     s = request.args.get('s')
+    # print(f"search: {s} - categoria: {categoria}")
     # path = request.full_path
     # parsed_url = urllib.parse.urlparse(path)
     # params = urllib.parse.parse_qs(parsed_url.query)
@@ -88,16 +89,15 @@ def search_articles():
     }
     try:
         if len(articles) == 0:
-            print('Vacio')
             articles = data_test()
             return search_products(articles, parametros)
 
         return search_products(articles, parametros)
 
     except Exception as e:
-        return f"Ocurrio un error {e}"
+        return f"Ocurrio un error: {e}"
 
 
 if __name__ == '__main__':
     # app.config['datos'] = data_test()
-    app.run(debug=True)
+    app.run(debug=True, host='192.168.0.130', port=8003)
